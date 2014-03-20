@@ -1,4 +1,4 @@
 GoNotebook
 ==========
 
-All source code from my golang book A Go Developer's Notebook
+This repository contains all of the source code from the book "A Go Developer's Notebook".
