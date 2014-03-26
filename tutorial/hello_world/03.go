@@ -1,12 +1,6 @@
 package main
-
-import "fmt"
-
-const(
-	HELLO = "hello"
-	WORLD = "world"
-)
+import . "fmt"
 
 func main() {
-	fmt.Println(HELLO, WORLD)
+	Println("hello world")
 }
