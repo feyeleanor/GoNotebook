@@ -1,5 +1,9 @@
 package main
+import (
+	. "fmt"
+	"os"
+)
 
-/*
-	TO DO: handle return codes, introduce if {} else if {}
-*/
+func main() {
+	Printf("hello world, %v\n", os.Args[1:])
+}

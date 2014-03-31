@@ -1,5 +1,10 @@
 package main
+import (
+	. "fmt"
+	"os"
+	"strings"
+)
 
-/*
-	TO DO: handle return codes, introduce switch {}
-*/
+func main() {
+	Printf("hello world, %v\n", strings.Join(os.Args[1:], " "))
+}

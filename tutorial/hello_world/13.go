@@ -1,16 +1,11 @@
 package main
-import . "fmt"
+import "fmt"
 
-const Hello = "hello"
-var world	string
-
-func init() {
-	Print(Hello, " ")
-	world = "world"
+func main() {
+	fmt.Println(message("world"))
 }
 
-func init() {
-	Printf("%v\n", world)
+func message(name string) (message string) {
+	message = fmt.Sprintf("hello %v", name)
+	return
 }
-
-func main() {}

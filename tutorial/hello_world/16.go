@@ -1,10 +1,10 @@
 package main
-import (
-	. "fmt"
-	"os"
-	"strings"
-)
+import . "fmt"
 
 func main() {
-	Printf("hello world, %v\n", strings.Join(os.Args[1:], " "))
+	print("Hello", "world")
+}
+
+func print(v ...interface{}) {
+	Println(v...)
 }

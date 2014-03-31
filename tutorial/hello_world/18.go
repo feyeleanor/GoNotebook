@@ -1,5 +1,12 @@
 package main
+import . "fmt"
 
-/*
-	TO DO: play with environment variables
-*/
+const Hello = "hello"
+var world	string
+
+func init() {
+	world = "world"
+	Println(Hello, world)
+}
+
+func main() {}

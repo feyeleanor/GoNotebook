@@ -1,9 +1,10 @@
 package main
-import (
-	. "fmt"
-	"os"
-)
+import . "fmt"
 
 func main() {
-	Printf("hello world, %v\n", os.Args[1:])
+	Println(message())
+}
+
+func message() (string, string) {
+	return "hello", "world"
 }

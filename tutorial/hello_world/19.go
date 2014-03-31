@@ -1,5 +1,16 @@
 package main
+import . "fmt"
 
-/*
-	TO DO: launch program using os
-*/
+const Hello = "hello"
+var world	string
+
+func init() {
+	Print(Hello, " ")
+	world = "world"
+}
+
+func init() {
+	Printf("%v\n", world)
+}
+
+func main() {}

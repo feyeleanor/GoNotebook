@@ -1,12 +1,11 @@
 package main
-import . "fmt"
+import "fmt"
 
-const Hello = "hello"
-var world	string
-
-func init() {
-	world = "world"
-	Println(Hello, world)
+func main() {
+	Println(message("world"))
 }
 
-func main() {}
+func message(name string) (message string) {
+	message = fmt.Sprintf("hello %v", name)
+	return message
+}

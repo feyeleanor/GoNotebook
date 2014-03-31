@@ -1,20 +1,13 @@
 package main
-import (
-	"flag"
-	. "fmt"
-	. "strings"
-)
+import . "fmt"
 
-var name, spacer *string
-var message	string
+const Hello = "hello"
+var world	string
 
 func init() {
-	name = flag.String("n", "world", "n: name of person to greet")
-	spacer = flag.String("s", ",", "s: separator between name and message")
-	flag.Parse()
-	message = Join(flag.Args(), " ")
+	world = "world"
 }
 
 func main() {
-	Printf("hello %v%v %v\n", *name, *spacer, message)
+	Println(Hello, world)
 }
