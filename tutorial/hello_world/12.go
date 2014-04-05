@@ -2,7 +2,7 @@ package main
 import "fmt"
 
 func main() {
-	Println(message("world"))
+	fmt.Println(message("world"))
 }
 
 func message(name string) (message string) {
