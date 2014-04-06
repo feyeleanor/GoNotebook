@@ -17,8 +17,8 @@ func init() {
 		def_n = "world"
 	}
 
-	var def_c int
-	if def_c, e = strconv.Atoi(os.Getenv("DEF_REPS")); e != nil {
+	def_c, e := strconv.Atoi(os.Getenv("DEF_REPS"))
+	if e != nil {
 		def_c = 0
 	}
 
