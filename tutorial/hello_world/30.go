@@ -3,6 +3,7 @@ import (
 	"os"
 	. "flag"
 	. "fmt"
+	"strconv"
 	. "strings"
 )
 
@@ -16,9 +17,11 @@ func init() {
 		def_n = "world"
 	}
 
+	def_c, _ := strconv.Atoi(os.Getenv("DEF_REPS"))
+
 	name = String("n", def_n, "n: name of person to greet")
 	spacer = String("s", ",", "s: separator between name and message")
-	IntVar(&repeats, "c", 0, "c: number of times to display the message")
+	IntVar(&repeats, "c", def_c, "c: number of times to display the message")
 	Parse()
 	message = Join(Args(), " ")
 }

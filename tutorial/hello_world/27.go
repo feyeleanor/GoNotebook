@@ -1,6 +1,7 @@
 package main
 import (
-	"flag"
+	"os"
+	. "flag"
 	. "fmt"
 	. "strings"
 )
@@ -10,18 +11,26 @@ var message	string
 var repeats int
 
 func init() {
-	name = flag.String("n", "world", "n: name of person to greet")
-	spacer = flag.String("s", ",", "s: separator between name and message")
-	flag.IntVar(&repeats, "c", 0, "c: number of times to display the message")
-	flag.Parse()
-	message = Join(flag.Args(), " ")
+	var def_n string
+
+	if def_n = os.Getenv("DEF_NAME"); len(def_n) == 0 {
+		def_n = "world"
+	}
+
+	name = String("n", def_n, "n: name of person to greet")
+	spacer = String("s", ",", "s: separator between name and message")
+	IntVar(&repeats, "c", 0, "c: number of times to display the message")
+	Parse()
+	message = Join(Args(), " ")
 }
 
 func main() {
-	for ; repeats > 0; repeats-- {
-		if len(message) > 0 {
+	if len(message) > 0 {
+		for ; repeats > 0; repeats-- {
 			Printf("hello %v%v %v\n", *name, *spacer, message)
-		} else {
+		}
+	} else {
+		for ; repeats > 0; repeats-- {
 			Println("hello", *name)
 		}
 	}
