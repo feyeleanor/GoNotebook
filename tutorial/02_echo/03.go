@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	Printf("hello world, %v\n", strings.Join(os.Args[1:], " "))
+	Println(strings.Join(os.Args[1:], " "))
 }

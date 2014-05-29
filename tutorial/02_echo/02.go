@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	Printf("hello world, %v\n", os.Args)
+	Println(os.Args[1:])
 }
