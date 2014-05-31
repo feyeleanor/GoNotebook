@@ -2,10 +2,13 @@ package main
 import (
   . "fmt"
   . "net/http"
+  "sync"
 )
 
 const ADDRESS = ":1024"
 const SECURE_ADDRESS = ":1025"
+
+var servers sync.WaitGroup
 
 func main() {
   message := "hello world"
@@ -14,16 +17,20 @@ func main() {
     Fprintf(w, message)
   })
 
-  done := make(chan bool)
-  go func () {
-    go func() {
-      ListenAndServe(ADDRESS, nil)
-      done <- true
-    }()
+  Launch(func() {
+    ListenAndServe(ADDRESS, nil)
+  })
 
+  Launch(func() {
     ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
-    done <- true
+  })
+  servers.Wait()
+}
+
+func Launch(f func()) {
+  servers.Add(1)
+  go func() {
+    defer servers.Done()
+    f()
   }()
-  <- done
-  <- done
 }
