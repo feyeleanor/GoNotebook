@@ -6,12 +6,12 @@ import (
 )
 
 func main() {
-  if server, e := net.Listen("tcp", ":8080"); e == nil {
+  if listener, e := net.Listen("tcp", ":8080"); e == nil {
     for {
-      if connection, e := server.Accept(); e == nil {
+      if connection, e := listener.Accept(); e == nil {
+        defer connection.Close()
         go func(c net.Conn) {
           Fprintln(c, "hello world")
-          c.Close()
         }(connection)
       }
     }
