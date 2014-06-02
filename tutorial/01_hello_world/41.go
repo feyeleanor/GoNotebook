@@ -13,7 +13,7 @@ func main() {
       InsecureSkipVerify: true,
     }
 
-    if connection, e := tls.Dial("tcp", ":8081", &config); e == nil {
+    if connection, e := tls.Dial("tcp", ":1025", &config); e == nil {
       defer connection.Close()
       if text, e := bufio.NewReader(connection).ReadString('\n'); e == nil {
         Printf(text)

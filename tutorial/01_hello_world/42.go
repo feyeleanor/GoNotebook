@@ -11,11 +11,11 @@ import (
 var servers sync.WaitGroup
 
 func main() {
-  if listener, e := net.Listen("tcp", ":8080"); e == nil {
+  if listener, e := net.Listen("tcp", ":1024"); e == nil {
     Serve(listener)
   }
 
-  Serve(TLSListener("server.cert.pem", "server.key.pem", ":8081"))
+  Serve(TLSListener("server.cert.pem", "server.key.pem", ":1025"))
   servers.Wait()
 }
 
