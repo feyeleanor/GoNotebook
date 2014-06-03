@@ -4,7 +4,7 @@ import (
   . "net/http"
 )
 
-const ADDRESS = ":1024"
+const SECURE_ADDRESS = ":1025"
 
 func main() {
   message := "hello world"
@@ -12,5 +12,5 @@ func main() {
     w.Header().Set("Content-Type", "text/plain")
     Fprintf(w, message)
   })
-  ListenAndServeTLS(ADDRESS, "cert.pem", "key.pem", nil)
+  ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
 }
