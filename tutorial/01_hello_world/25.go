@@ -1,22 +1,37 @@
 package main
-import (
-  . "fmt"
-  . "net/http"
-)
 
-const ADDRESS = ":1024"
-const SECURE_ADDRESS = ":1025"
+import "fmt"
+
+type Hello struct {}
+
+func (h Hello) String() string {
+  return "Hello"
+}
+
+type World struct {}
+
+func (w *World) String() string {
+  return "world"
+}
+
+type Message struct {
+  X fmt.Stringer
+  Y fmt.Stringer
+}
+
+func (v Message) IsGreeting() (ok bool) {
+  if _, ok = v.X.(*Hello); !ok {
+    _, ok = v.Y.(*Hello)
+  }
+  return 
+}
 
 func main() {
-  message := "hello world"
-  HandleFunc("/hello", func(w ResponseWriter, r *Request) {
-    w.Header().Set("Content-Type", "text/plain")
-    Fprintf(w, message)
-  })
-
-  go func() {
-    ListenAndServe(ADDRESS, nil)
-  }()
-
-  ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
+  m := &Message{}
+  fmt.Println(m.IsGreeting())
+  m.X = Hello{}
+  fmt.Println(m.IsGreeting())
+  m.X = new(Hello)
+  fmt.Println(m.IsGreeting())
+  m.X = World{}
 }

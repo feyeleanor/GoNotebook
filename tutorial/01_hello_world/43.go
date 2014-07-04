@@ -1,28 +1,43 @@
 package main
-
 import (
   . "fmt"
-  "net"
+  . "net/http"
+  "os"
+  "sync"
 )
 
-var HELLO_WORLD = ([]byte)("Hello World\n")
+const SECURE_ADDRESS = ":1025"
 
-func main() {
-  if address, e := net.ResolveUDPAddr("udp", ":1024"); e == nil {
-    if server, e := net.ListenUDP("udp", address); e == nil {
-      for buffer := MakeBuffer(); ; buffer = MakeBuffer() {
-        if n, client, e := server.ReadFromUDP(buffer); e == nil {
-          go func(c *net.UDPAddr, packet []byte) {
-            if n, e := server.WriteToUDP(HELLO_WORLD, c); e == nil {
-              Printf("%v bytes written to: %v\n", n, c)
-            }
-		  }(client, buffer[:n])
-        }
-      }
-    }
+var address string
+var servers sync.WaitGroup
+
+func init() {
+  if address = os.Getenv("SERVE_HTTP"); address == "" {
+    address = ":1024"
   }
 }
 
-func MakeBuffer() (r []byte) {
-  return make([]byte, 1024)
+func main() {
+  message := "hello world"
+  HandleFunc("/hello", func(w ResponseWriter, r *Request) {
+    w.Header().Set("Content-Type", "text/plain")
+    Fprintf(w, message)
+  })
+
+  Launch(func() {
+    ListenAndServe(address, nil)
+  })
+
+  Launch(func() {
+    ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
+  })
+  servers.Wait()
+}
+
+func Launch(f func()) {
+  servers.Add(1)
+  go func() {
+    defer servers.Done()
+    f()
+  }()
 }

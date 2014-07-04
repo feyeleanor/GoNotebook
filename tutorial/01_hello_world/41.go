@@ -1,23 +1,31 @@
 package main
- 
 import (
-  "bufio"
-  "crypto/tls"
   . "fmt"
+  . "net/http"
+  "sync"
 )
- 
-func main() {
-  if certificate, e := tls.LoadX509KeyPair("client.cert.pem", "client.key.pem"); e == nil {
-    config := tls.Config{
-      Certificates: []tls.Certificate{ certificate },
-      InsecureSkipVerify: true,
-    }
 
-    if connection, e := tls.Dial("tcp", ":1025", &config); e == nil {
-      defer connection.Close()
-      if text, e := bufio.NewReader(connection).ReadString('\n'); e == nil {
-        Printf(text)
-      }
-    }
-  }
+const ADDRESS = ":1024"
+const SECURE_ADDRESS = ":1025"
+
+func main() {
+  message := "hello world"
+  HandleFunc("/hello", func(w ResponseWriter, r *Request) {
+    w.Header().Set("Content-Type", "text/plain")
+    Fprintf(w, message)
+  })
+
+  var servers sync.WaitGroup
+  servers.Add(1)
+  go func() {
+    defer servers.Done()
+    ListenAndServe(ADDRESS, nil)
+  }()
+
+  servers.Add(1)
+  go func() {
+    defer servers.Done()
+    ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
+  }()
+  servers.Wait()
 }

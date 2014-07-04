@@ -1,18 +1,32 @@
 package main
-import (
-  . "fmt"
-  . "net/http"
-)
 
-const MESSAGE = "hello world"
-const ADDRESS = ":1024"
+import "fmt"
 
-func main() {
-  HandleFunc("/hello", Hello)
-  ListenAndServe(ADDRESS, nil)
+type Hello struct {}
+
+func (h Hello) String() string {
+  return "Hello"
 }
 
-func Hello(w ResponseWriter, r *Request) {
-  w.Header().Set("Content-Type", "text/plain")
-  Fprintf(w, MESSAGE)
+type Message struct {
+  *Hello
+  World string
+}
+
+func (v Message) String() (r string) {
+  if v.Hello == nil {
+    r = v.World
+  } else {
+    r = fmt.Sprintf("%v %v", v.Hello, v.World)
+  }
+  return
+}
+
+func main() {
+  m := &Message{}
+  fmt.Println(m)
+  m.Hello = new(Hello)
+  fmt.Println(m)
+  m.World = "world"
+  fmt.Println(m)
 }

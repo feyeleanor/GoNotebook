@@ -1,13 +1,28 @@
 package main
-import . "fmt"
 
-const Hello = "hello"
-var world	string
+import "fmt"
 
-func init() {
-	world = "world"
+type Message struct {
+  X string
+  y *string
+}
+
+func (v Message) Print() {
+  if v.y != nil {
+    fmt.Println(v.X, *v.y)
+  } else {
+    fmt.Println(v.X)
+  }
+}
+
+func (v *Message) Store(x, y string) {
+  v.X = x
+  v.y = &y
 }
 
 func main() {
-	Println(Hello, world)
+  m := &Message{}
+  m.Print()
+  m.Store("Hello", "world")
+  m.Print()
 }

@@ -1,19 +1,36 @@
 package main
-
 import (
   . "fmt"
-  "net"
+  . "net/http"
 )
 
+const ADDRESS = ":1024"
+const SECURE_ADDRESS = ":1025"
+
 func main() {
-  if listener, e := net.Listen("tcp", ":1024"); e == nil {
-    for {
-      if connection, e := listener.Accept(); e == nil {
-        defer connection.Close()
-        go func(c net.Conn) {
-          Fprintln(c, "hello world")
-        }(connection)
-      }
-    }
+  message := "hello world"
+  HandleFunc("/hello", func(w ResponseWriter, r *Request) {
+    w.Header().Set("Content-Type", "text/plain")
+    Fprintf(w, message)
+  })
+
+  Spawn(
+    func() { ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil) },
+    func() { ListenAndServe(ADDRESS, nil) },
+  )
+}
+
+func Spawn(f ...func()) {
+  done := make(chan bool)
+
+  for _, s := range f {
+    go func() {
+      s()
+      done <- true
+    }()
+  }
+
+  for l := len(f); l > 0; l-- {
+    <- done
   }
 }

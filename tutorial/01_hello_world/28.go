@@ -1,29 +1,16 @@
 package main
-import (
-  . "fmt"
-  . "net/http"
-)
+import . "fmt"
 
-const ADDRESS = ":1024"
-const SECURE_ADDRESS = ":1025"
+const Hello = "hello"
+var world  string
 
-func main() {
-  message := "hello world"
-  HandleFunc("/hello", func(w ResponseWriter, r *Request) {
-    w.Header().Set("Content-Type", "text/plain")
-    Fprintf(w, message)
-  })
-
-  done := make(chan bool)
-  go func () {
-    go func() {
-      ListenAndServe(ADDRESS, nil)
-      done <- true
-    }()
-
-    ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
-    done <- true
-  }()
-  <- done
-  <- done
+func init() {
+  Print(Hello, " ")
+  world = "world"
 }
+
+func init() {
+  Printf("%v\n", world)
+}
+
+func main() {}

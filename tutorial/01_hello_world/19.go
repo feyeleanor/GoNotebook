@@ -1,16 +1,19 @@
 package main
-import . "fmt"
 
-const Hello = "hello"
-var world	string
+import "fmt"
 
-func init() {
-	Print(Hello, " ")
-	world = "world"
+type HelloWorld struct {}
+
+func (h HelloWorld) String() string {
+  return "Hello world"
 }
 
-func init() {
-	Printf("%v\n", world)
+type Message struct {
+  HelloWorld
 }
 
-func main() {}
+func main() {
+  m := &Message{}
+  fmt.Println(m.String())
+  fmt.Println(m)
+}

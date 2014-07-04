@@ -1,27 +1,36 @@
 package main
- 
 import (
-  "crypto/rand"
-  "crypto/tls"
   . "fmt"
+  . "net/http"
 )
- 
-func main() {
-  if certificate, e := tls.LoadX509KeyPair("server.cert.pem", "server.key.pem"); e == nil {
-    config := tls.Config{
-      Certificates: []tls.Certificate{ certificate },
-      Rand: rand.Reader,
-    }
 
-    if listener, e := tls.Listen("tcp", ":1025", &config); e == nil {
-      for {
-        if connection, e := listener.Accept(); e == nil {
-          defer connection.Close()
-          go func(c *tls.Conn) {
-            Fprintln(c, "hello world")
-          }(connection.(*tls.Conn))
-        }
-      }
-    }
+const ADDRESS = ":1024"
+const SECURE_ADDRESS = ":1025"
+
+func main() {
+  message := "hello world"
+  HandleFunc("/hello", func(w ResponseWriter, r *Request) {
+    w.Header().Set("Content-Type", "text/plain")
+    Fprintf(w, message)
+  })
+
+  Spawn(
+    func() { ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil) },
+    func() { ListenAndServe(ADDRESS, nil) },
+  )
+}
+
+func Spawn(f ...func()) {
+  done := make(chan bool)
+
+  for _, s := range f {
+    go func(server func()) {
+      server()
+      done <- true
+    }(s)
+  }
+
+  for l := len(f); l > 0; l-- {
+    <- done
   }
 }

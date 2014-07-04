@@ -2,9 +2,9 @@ package main
 import . "fmt"
 
 func main() {
-	greet("world")
+  greet("world")
 }
 
 func greet(name string) {
-	Println("hello", name)
+  Println("hello", name)
 }

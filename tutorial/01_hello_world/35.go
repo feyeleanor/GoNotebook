@@ -2,35 +2,10 @@ package main
 import (
   . "fmt"
   . "net/http"
-  "os"
-  "sync"
 )
 
-var (
-  address string
-  secure_address string
-  certificate string
-  key string
-)
-var servers sync.WaitGroup
-
-func init() {
-  if address = os.Getenv("SERVE_HTTP"); address == "" {
-    address = ":1024"
-  }
-
-  if secure_address = os.Getenv("SERVE_HTTPS"); secure_address == "" {
-    secure_address = ":1025"
-  }
-
-  if certificate = os.Getenv("SERVE_CERT"); certificate == "" {
-    certificate = "cert.pem"
-  }
-
-  if key = os.Getenv("SERVE_KEY"); key == "" {
-    key = "key.pem"
-  }
-}
+const ADDRESS = ":1024"
+const SECURE_ADDRESS = ":1025"
 
 func main() {
   message := "hello world"
@@ -39,20 +14,12 @@ func main() {
     Fprintf(w, message)
   })
 
-  Launch(func() {
-    ListenAndServe(address, nil)
-  })
-
-  Launch(func() {
-    ListenAndServeTLS(secure_address, certificate, key, nil)
-  })
-  servers.Wait()
-}
-
-func Launch(f func()) {
-  servers.Add(1)
+  done := make(chan bool)
   go func() {
-    defer servers.Done()
-    f()
+    ListenAndServe(ADDRESS, nil)
+    done <- true
   }()
+
+  ListenAndServeTLS(SECURE_ADDRESS, "cert.pem", "key.pem", nil)
+  <- done
 }
