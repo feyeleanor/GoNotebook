@@ -14,9 +14,8 @@ var HELLO_WORLD = []byte("Hello World")
 var RSA_LABEL = []byte("served")
 
 func main() {
-  Serve(":1025", func(connection *UDPConn, c *UDPAddr, packet *bytes.Buffer) {
+  Serve(":1025", func(connection *UDPConn, c *UDPAddr, packet *bytes.Buffer) (n int) {
     var e error
-    var n int
     var key rsa.PublicKey
     var response []byte
 
@@ -31,18 +30,20 @@ func main() {
     if n, e = connection.WriteToUDP(response, c); e != nil {
       log.Println("unable to write response to client:", c)
     }
-    log.Println(n, "bytes written to", c)
+    return
   })
 }
 
-func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer)) {
+func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
   Launch(address, func(connection *UDPConn) {
     for {
-      b := make([]byte, 1024)
-      if n, c, e := connection.ReadFromUDP(b); e == nil {
-        go func(client *UDPAddr, buffer []byte) {
-          f(connection, client, bytes.NewBuffer(buffer))
-        }(c, b[:n])
+      buffer := make([]byte, 1024)
+      if n, client, e := connection.ReadFromUDP(buffer); e == nil {
+        go func(c *UDPAddr, b []byte) {
+          if n := f(connection, c, bytes.NewBuffer(b)); n != 0 {
+            log.Println(n, "bytes written to", c)
+          }
+        }(client, buffer[:n])
       } else {
         log.Println(address, e.Error())
       }

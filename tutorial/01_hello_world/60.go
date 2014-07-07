@@ -6,12 +6,26 @@ import (
   "crypto/rsa"
   "crypto/sha1"
   "encoding/gob"
+  "fmt"
   "log"
   . "net"
 )
 
 var HELLO_WORLD = []byte("Hello World")
 var RSA_LABEL = []byte("served")
+
+type LaunchError []interface{}
+
+func (l LaunchError) Error() (r string) {
+  if len(l) > 0 {
+    r = fmt.Sprintf(l[0].(string), l[1:]...)
+  }
+  return
+}
+
+func NewLaunchError(format string, v ...interface{}) (l LaunchError) {
+  return LaunchError(append([]interface{}{ format }, v))
+}
 
 func main() {
   Serve(":1025", func(connection *UDPConn, c *UDPAddr, packet *bytes.Buffer) (n int) {
@@ -30,7 +44,12 @@ func main() {
 }
 
 func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
-  Launch(address, func(connection *UDPConn) {
+  e := Launch(address, func(connection *UDPConn) (e error) {
+    defer func() {
+      if x := recover(); x != nil {
+        e = LaunchError{ "serve failure %v", x }
+      }
+    }()
     for {
       buffer := make([]byte, 1024)
       if n, client, e := connection.ReadFromUDP(buffer); e == nil {
@@ -43,16 +62,21 @@ func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
         log.Println(address, e.Error())
       }
     }
+    return
   })
+
+  if e, ok:= e.(LaunchError); ok {
+    log.Fatalln(e.Error())
+  }
 }
 
-func Launch(address string, f func(*UDPConn)) {
+func Launch(address string, f func(*UDPConn) error) error {
   var connection *UDPConn
 
   if a, e := ResolveUDPAddr("udp", address); e != nil {
-    log.Fatalln("unable to resolve UDP address:", e.Error())
+    return NewLaunchError("unable to resolve UDP address:", e.Error())
   } else if connection, e = ListenUDP("udp", a); e != nil {
-    log.Fatalln("can't open socket for listening:", e.Error())
+    return LaunchError{ "can't open socket for listening:", e.Error() }
   }
-  f(connection)
+  return f(connection)
 }

@@ -6,12 +6,30 @@ import (
   "crypto/rsa"
   "crypto/sha1"
   "encoding/gob"
+  "fmt"
   "log"
   . "net"
 )
 
 var HELLO_WORLD = []byte("Hello World")
 var RSA_LABEL = []byte("served")
+
+type Exception interface {
+  error
+}
+
+type LaunchException []interface{}
+
+func (l LaunchException) Error() (r string) {
+  if len(l) > 0 {
+    r = fmt.Sprintf(l[0].(string), l[1:]...)
+  }
+  return
+}
+
+func RaiseLaunchException(format string, v ...interface{}) {
+  panic(LaunchException(append([]interface{}{ format }, v)))
+}
 
 func main() {
   Serve(":1025", func(connection *UDPConn, c *UDPAddr, packet *bytes.Buffer) (n int) {
@@ -30,8 +48,30 @@ func main() {
 }
 
 func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
+  defer func() {
+    if e := recover(); e != nil {
+      switch e := e.(type) {
+      case LaunchException:
+        log.Fatalln("Launch Error:", e.Error())
+      case Exception:
+        log.Fatalln("Exception:", e.Error())
+      default:
+        panic(e)
+      }
+    }
+  }()
+
   Launch(address, func(connection *UDPConn) {
     for {
+      defer func() {
+        if e := recover(); e != nil {
+          if _, ok := e.(Exception); ok {
+            panic(e)
+          }
+          RaiseLaunchException("serve failure %v", e)
+        }
+      }()
+
       buffer := make([]byte, 1024)
       if n, client, e := connection.ReadFromUDP(buffer); e == nil {
         go func(c *UDPAddr, b []byte) {
@@ -43,6 +83,7 @@ func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
         log.Println(address, e.Error())
       }
     }
+    return
   })
 }
 
@@ -50,9 +91,9 @@ func Launch(address string, f func(*UDPConn)) {
   var connection *UDPConn
 
   if a, e := ResolveUDPAddr("udp", address); e != nil {
-    log.Fatalln("unable to resolve UDP address:", e.Error())
+    RaiseLaunchException("unable to resolve UDP address:", e.Error())
   } else if connection, e = ListenUDP("udp", a); e != nil {
-    log.Fatalln("can't open socket for listening:", e.Error())
+    panic(LaunchException{ "can't open socket for listening:", e.Error() })
   }
   f(connection)
 }

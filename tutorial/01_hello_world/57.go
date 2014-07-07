@@ -47,7 +47,7 @@ func LoadPrivateKey(file string, f func(*rsa.PrivateKey)) {
           f(key)
         }
       }
-	}
+    }
   }
   return
 }

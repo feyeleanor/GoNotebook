@@ -14,24 +14,27 @@ var HELLO_WORLD = []byte("Hello World")
 var RSA_LABEL = []byte("served")
 
 func main() {
-  Serve(":1025", func(connection *UDPConn, c *UDPAddr, packet *bytes.Buffer) {
+  Serve(":1025", func(connection *UDPConn, c *UDPAddr, packet *bytes.Buffer) (n int) {
     var key rsa.PublicKey
     if e := gob.NewDecoder(packet).Decode(&key); e == nil {
       if response, e := rsa.EncryptOAEP(sha1.New(), rand.Reader, &key, HELLO_WORLD, RSA_LABEL); e == nil {
-        if n, e := connection.WriteToUDP(response, c); e == nil {
-          Println(n, "bytes written to", c)
-        }
+        n, _ = connection.WriteToUDP(response, c)
       }
     }
+    return
   })
 }
 
-func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer)) {
+func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
   Launch(address, func(connection *UDPConn) {
     for {
       buffer := make([]byte, 1024)
       if n, client, e := connection.ReadFromUDP(buffer); e == nil {
-        go f(connection, client, bytes.NewBuffer(buffer[:n]))
+        go func(c *UDPAddr, b []byte) {
+          if n := f(connection, c, bytes.NewBuffer(b)); n != 0 {
+            Println(n, "bytes written to", c)
+          }
+        }(client, buffer[:n])
       }
     }
   })

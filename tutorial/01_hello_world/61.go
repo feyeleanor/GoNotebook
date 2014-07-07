@@ -6,6 +6,8 @@ import (
   "crypto/rsa"
   "crypto/sha1"
   "encoding/gob"
+  "errors"
+  "fmt"
   "log"
   . "net"
 )
@@ -30,7 +32,12 @@ func main() {
 }
 
 func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
-  Launch(address, func(connection *UDPConn) {
+  e := Launch(address, func(connection *UDPConn) (e error) {
+    defer func() {
+      if x := recover(); x != nil {
+        e = fmt.Errorf("serve failure %v", x)
+      }
+    }()
     for {
       buffer := make([]byte, 1024)
       if n, client, e := connection.ReadFromUDP(buffer); e == nil {
@@ -43,16 +50,21 @@ func Serve(address string, f func(*UDPConn, *UDPAddr, *bytes.Buffer) int) {
         log.Println(address, e.Error())
       }
     }
+    return
   })
+
+  if e != nil {
+    log.Fatalln(e.Error())
+  }
 }
 
-func Launch(address string, f func(*UDPConn)) {
+func Launch(address string, f func(*UDPConn) error) error {
   var connection *UDPConn
 
   if a, e := ResolveUDPAddr("udp", address); e != nil {
-    log.Fatalln("unable to resolve UDP address:", e.Error())
+    return fmt.Errorf("unable to resolve UDP address: %v", e)
   } else if connection, e = ListenUDP("udp", a); e != nil {
-    log.Fatalln("can't open socket for listening:", e.Error())
+    return errors.New(fmt.Sprintf("can't open socket for listening: %v", e.Error()))
   }
-  f(connection)
+  return f(connection)
 }
