@@ -1,0 +1,3 @@
+Example
+text
+for printing!

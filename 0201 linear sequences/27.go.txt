@@ -1,0 +1,19 @@
+package main
+import . "fmt"
+import "reflect"
+
+func main() {
+  v := reflect.ValueOf([]int{0, 2, 4, 6, 8})
+  for i := 0; i < v.Len(); i++ {
+leanpub-start-insert
+    x := v.Index(i)
+leanpub-end-insert
+    Printf("%v: %v\n", i, x)
+leanpub-start-insert
+    x.SetInt(int64(i))
+leanpub-end-insert
+  }
+  for i := 0; i < v.Len(); i++ {
+    Printf("%v: %v\n", i, v.Index(i))
+  }
+}
