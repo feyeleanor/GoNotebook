@@ -5,7 +5,7 @@ const Hello = "hello"
 var world = "world"
 
 func main() {
-  var w string
-  w = world + "!"
+  var world string
+  world = world + "!"
   Println(Hello, w)
 }
