@@ -16,8 +16,7 @@ func (v Message) Print() {
 }
 
 func (v *Message) Store(x, y string) {
-  v.X = x
-  v.y = &y
+  v.X, v.y = x, &y
 }
 
 func main() {
